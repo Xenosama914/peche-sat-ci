@@ -1,0 +1,42 @@
+# --- FICHIERS SECRETS ET CLÉS API (NE JAMAIS PUBLIER) ---
+.env
+ee-key.json
+*.json
+!package.json
+# Le verrou de versions n'est pas un secret, et sans lui la construction en ligne
+# (npm ci) échoue. Il doit donc être suivi, contrairement au reste des .json.
+!package-lock.json
+!tailwind.config.js
+!postcss.config.js
+
+# --- DOSSIER BACKEND (PYTHON) ---
+backend/venv/
+backend/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+.env.local
+.pytest_cache/
+
+# --- DOSSIER FRONTEND (REACT / NODE) ---
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- SYSTEME D'EXPLOITATION (WINDOWS / MAC) ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- EDITEUR DE CODE (VS CODE) ---
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln.docstates

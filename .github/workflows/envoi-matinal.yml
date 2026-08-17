@@ -1,0 +1,41 @@
+name: Envoi matinal
+
+# Le déclencheur de l'alerte quotidienne.
+#
+# Pourquoi ici et pas dans l'application : sur un hébergement gratuit, le moteur
+# s'endort après quelques minutes sans visite. Un planificateur interne endormi
+# n'envoie rien du tout. Un appel qui arrive de l'extérieur, lui, réveille le
+# moteur, puis déclenche l'envoi. GitHub Actions le fait gratuitement.
+#
+# La Côte d'Ivoire est à UTC+0 : 05:30 UTC est donc bien 05:30 à Abidjan,
+# avant que les pirogues ne partent.
+
+on:
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch:      # permet aussi de le lancer à la main depuis GitHub
+
+jobs:
+  alerter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Réveiller le moteur
+        # Un service gratuit endormi met jusqu'à une minute à se relever.
+        # On frappe à la porte, sans se soucier de l'échec de ce premier appel.
+        run: |
+          curl -s -m 120 --retry 4 --retry-delay 15 --retry-all-errors \
+            "${{ secrets.API_URL }}/api/sante" || true
+
+      - name: Lancer l'envoi matinal
+        run: |
+          reponse=$(curl -s -m 300 -w "\n%{http_code}" -X POST \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.API_URL }}/api/cron/envoi-matinal")
+          corps=$(echo "$reponse" | head -n -1)
+          code=$(echo "$reponse" | tail -n 1)
+          echo "$corps"
+          if [ "$code" != "200" ]; then
+            echo "::error::L'envoi matinal a échoué (HTTP $code)"
+            exit 1
+          fi
+          echo "::notice::Envoi matinal terminé."

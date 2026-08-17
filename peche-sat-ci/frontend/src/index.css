@@ -1,0 +1,262 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+@config "../tailwind.config.js";
+
+/* ============================================================
+   Pêche-Sat CI, application interne.
+   Mêmes jetons que la vitrine : une seule marque, deux surfaces.
+   ============================================================ */
+:root {
+  --canvas: #060d18;
+  --canvas-deep: #03070f;
+  --panel: #0e1a2b;
+  --panel-2: #122238;
+  --panel-edge: #1c2c44;
+  --line: #152238;
+  --line-strong: #4e648a;
+  --line-hover: #6b86b3;
+  --accent: #2bc99b;
+  --accent-hover: #4fd9b0;
+  --accent-muted: #153f36;
+  --warn: #e9a83c;
+  --danger: #e4574c;
+  --text-primary: #eaf0f7;
+  --text-secondary: #93a6c0;
+  --text-muted: #7d90ab;
+  --display: "Bricolage Grotesque", Georgia, serif;
+  --body: "Public Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+html,
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--text-primary);
+  font-family: var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* le même environnement que la vitrine : une seule pièce, pas des blocs empilés */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, #0d2036 0%, rgba(6, 13, 24, 0) 60%),
+    radial-gradient(ellipse 90% 60% at 80% 110%, #08202a 0%, rgba(6, 13, 24, 0) 55%);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ---------- surfaces ---------- */
+.panneau {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 14px;
+}
+
+.panneau-tete {
+  border-bottom: 1px solid var(--line);
+  padding: 0.75rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.kicker {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+.secondaire { color: var(--text-secondary); }
+.discret { color: var(--text-muted); font-family: var(--mono); font-size: 0.72rem; }
+
+/* ---------- la puce de décision, la ponctuation de la marque ---------- */
+.puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(96, 116, 150, 0.34);
+  background: rgba(8, 15, 26, 0.6);
+  white-space: nowrap;
+}
+.puce::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.puce-go { color: var(--accent); border-color: rgba(43, 201, 155, 0.42); background: rgba(9, 32, 26, 0.6); }
+.puce-attente { color: var(--warn); border-color: rgba(233, 168, 60, 0.4); background: rgba(38, 27, 9, 0.6); }
+.puce-stop { color: var(--danger); border-color: rgba(228, 87, 76, 0.4); background: rgba(38, 13, 11, 0.6); }
+.puce-neutre { color: #8fa0b8; }
+
+/* ---------- boutons ---------- */
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease),
+    border-color 0.3s var(--ease), transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.bouton:disabled { opacity: 0.45; cursor: not-allowed; }
+.bouton-go { background: var(--accent); color: #04140f; font-weight: 500; }
+.bouton-go:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 8px 22px rgba(43, 201, 155, 0.22); }
+.bouton-fantome { border-color: var(--line-strong); color: var(--text-primary); background: rgba(6, 13, 24, 0.5); }
+.bouton-fantome:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.bouton-discret { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-family: var(--mono); font-size: 0.76rem; display: inline-flex; align-items: center; gap: 0.4rem; }
+.bouton-discret:hover { color: var(--accent); }
+
+/* ---------- formulaires ---------- */
+.etiquette {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+}
+.saisie {
+  width: 100%;
+  background: rgba(6, 13, 24, 0.75);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 0.62rem 0.8rem;
+  color: var(--text-primary);
+  font-family: var(--body);
+  font-size: 0.95rem;
+  transition: border-color 0.3s var(--ease);
+}
+.saisie::placeholder { color: #5d6e87; }
+.saisie:hover { border-color: var(--line-hover); }
+.saisie:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+
+/* ---------- tableaux ---------- */
+.tableau { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.tableau th {
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  font-weight: 400;
+  color: var(--text-muted);
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.tableau td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--line); color: var(--text-secondary); }
+.tableau tr:last-child td { border-bottom: none; }
+.tableau tbody tr { transition: background 0.25s var(--ease); }
+.tableau tbody tr.cliquable { cursor: pointer; }
+.tableau tbody tr.cliquable:hover { background: rgba(43, 201, 155, 0.06); }
+.tableau tbody tr.selectionnee { background: rgba(43, 201, 155, 0.11); }
+.tableau td.principal { color: var(--text-primary); font-weight: 600; }
+
+/* ---------- tuiles de chiffres ---------- */
+.tuile {
+  background: linear-gradient(160deg, var(--panel) 0%, rgba(14, 26, 43, 0.4) 100%);
+  border: 1px solid var(--panel-edge);
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+  position: relative;
+  overflow: hidden;
+}
+.tuile::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-muted), var(--accent));
+  opacity: 0.6;
+}
+.tuile-valeur {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 2.1rem;
+  line-height: 1;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  margin-top: 0.5rem;
+}
+
+/* ---------- messages ---------- */
+.alerte { border-radius: 10px; padding: 0.8rem 0.9rem; font-size: 0.88rem; display: flex; gap: 0.6rem; align-items: flex-start; }
+.alerte-erreur { background: rgba(38, 13, 11, 0.6); border: 1px solid rgba(228, 87, 76, 0.4); color: #f3b3ad; }
+.alerte-ok { background: rgba(9, 32, 26, 0.6); border: 1px solid rgba(43, 201, 155, 0.4); color: #9fe8cd; }
+.alerte-attente { background: rgba(38, 27, 9, 0.55); border: 1px solid rgba(233, 168, 60, 0.4); color: #f0cf95; }
+
+/* ---------- la carte, en tenue de nuit ---------- */
+.leaflet-container { background: #071322; font-family: var(--body); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: var(--panel); color: var(--text-primary);
+  border: 1px solid var(--panel-edge); box-shadow: 0 12px 40px rgba(3, 7, 15, 0.7);
+}
+.leaflet-popup-content-wrapper { border-radius: 10px; }
+.leaflet-container a.leaflet-popup-close-button { color: var(--text-secondary); }
+.leaflet-control-attribution {
+  background: rgba(6, 13, 24, 0.82) !important;
+  color: var(--text-muted) !important;
+  font-family: var(--mono); font-size: 0.62rem;
+}
+.leaflet-control-attribution a { color: var(--text-secondary) !important; }
+.leaflet-bar a {
+  background: var(--panel); color: var(--text-primary); border-color: var(--panel-edge);
+}
+.leaflet-bar a:hover { background: var(--panel-2); color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -1,0 +1,66 @@
+# Déploiement gratuit de Pêche-Sat CI sur Render.
+#
+# Trois services, tous sur le palier gratuit :
+#   1. le moteur (FastAPI)         : calcule les scores, envoie les SMS
+#   2. le tableau de bord (React)  : l'espace de pilotage
+#   3. la vitrine (HTML statique)  : le site public
+#
+# La base de données n'est PAS ici : elle reste sur Neon, où elle est déjà.
+#
+# Les secrets sont marqués `sync: false` : Render les demande au moment du
+# déploiement et ils ne se trouvent jamais dans le dépôt.
+
+services:
+  - type: web
+    name: peche-sat-ci-moteur
+    runtime: python
+    plan: free
+    region: frankfurt
+    rootDir: peche-sat-ci/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/sante
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.3"
+      - key: DATABASE_URL          # la chaîne Neon
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CRON_SECRET           # partagé avec GitHub Actions
+        sync: false
+      - key: GEE_SERVICE_ACCOUNT
+        sync: false
+      - key: GEE_KEY_JSON          # le CONTENU de ee-key.json, pas son chemin
+        sync: false
+      - key: AT_USERNAME
+        sync: false
+      - key: AT_API_KEY
+        sync: false
+      - key: AT_SENDER_ID
+        sync: false
+      - key: ORIGINES_AUTORISEES   # les adresses des deux sites, séparées par des virgules
+        sync: false
+
+  - type: web
+    name: peche-sat-ci-tableau
+    runtime: static
+    plan: free
+    rootDir: peche-sat-ci/frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL          # l'adresse du moteur ci-dessus
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  - type: web
+    name: peche-sat-ci-vitrine
+    runtime: static
+    plan: free
+    rootDir: site
+    buildCommand: ""
+    staticPublishPath: .

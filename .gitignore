@@ -1,0 +1,34 @@
+# --- SECRETS, NE JAMAIS PUBLIER ---
+.env
+*.env
+ee-key.json
+peche-sat-ci/backend/.env
+peche-sat-ci/backend/ee-key.json
+
+# --- FICHIERS DE TRAVAIL, HORS DU SITE PUBLIÉ ---
+review/
+*.mp4
+!site/assets/hero-scrub.mp4
+
+# --- OUTILLAGE LOCAL, PAS LE PROJET ---
+.claude/skills/
+
+# --- PYTHON ---
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+peche-sat-ci/backend/venv/
+
+# --- NODE ---
+node_modules/
+dist/
+.vite/
+npm-debug.log*
+
+# --- SYSTÈME ET ÉDITEURS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
