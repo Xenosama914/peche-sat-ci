@@ -1390,7 +1390,7 @@ var FORM_ENDPOINT = 'https://formspree.io/f/mvkpwzaz';
 /* DEPLOY STEP: l'adresse de l'API Pêche-Sat CI une fois le moteur en ligne.
    Laissée vide, la demande part uniquement par email. Renseignée, elle arrive
    AUSSI dans l'application, où l'équipe la voit avec les autres. */
-var API_BASE = '';
+var API_BASE = 'https://peche-sat-ci-moteur.onrender.com';
 
 function envoyerAuMoteur(form){
   if (!API_BASE) return Promise.resolve(null);
