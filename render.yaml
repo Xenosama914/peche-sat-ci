@@ -42,10 +42,11 @@ services:
       - key: ORIGINES_AUTORISEES   # les adresses des deux sites, séparées par des virgules
         sync: false
 
+  # Les sites statiques sont gratuits par nature chez Render : ils ne prennent
+  # pas de champ `plan`, en indiquer un fait échouer la lecture du fichier.
   - type: web
     name: peche-sat-ci-tableau
     runtime: static
-    plan: free
     rootDir: peche-sat-ci/frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
@@ -60,7 +61,8 @@ services:
   - type: web
     name: peche-sat-ci-vitrine
     runtime: static
-    plan: free
     rootDir: site
-    buildCommand: ""
+    # La vitrine est déjà du HTML prêt à servir : rien à construire, mais Render
+    # attend tout de même une commande.
+    buildCommand: echo "vitrine statique, rien a construire"
     staticPublishPath: .
