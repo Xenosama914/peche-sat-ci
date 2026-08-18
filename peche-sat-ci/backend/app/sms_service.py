@@ -59,10 +59,20 @@ def _envoyer_via_http_client(telephone: str, texte: str) -> dict:
     try:
         conn.request("POST", "/version1/messaging", body=corps, headers=headers)
         reponse = conn.getresponse()
-        donnees = json.loads(reponse.read().decode())
+        statut = reponse.status
+        brut = reponse.read().decode(errors="replace")
     finally:
         conn.close()
-    return donnees
+
+    # AT ne repond pas toujours en JSON : une cle refusee ou un compte suspendu
+    # renvoie une page HTML. json.loads echouait alors sur "Expecting value:
+    # line 1 column 1", un message qui ne dit ni le code HTTP ni la raison. On
+    # remonte les deux, sinon le diagnostic est impossible depuis le navigateur.
+    try:
+        return json.loads(brut)
+    except json.JSONDecodeError:
+        extrait = " ".join(brut.split())[:200] or "(reponse vide)"
+        raise RuntimeError(f"reponse non-JSON d'Africa's Talking (HTTP {statut}) : {extrait}") from None
 
 
 def envoyer_alerte(telephone: str, texte: str) -> dict:
